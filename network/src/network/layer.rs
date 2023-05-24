@@ -1,4 +1,4 @@
-use std::{f64::consts::E};
+use std::f64::consts::E;
 #[derive(Debug, Clone, Copy)]
 pub enum ActivationFunction {
     Sigmoid,
@@ -30,13 +30,14 @@ fn apply_derivitive_activation_function(x: f64, f: ActivationFunction) -> f64 {
 }
 pub mod train_layer {
     use crate::network::ActivationFunction;
-    use byteorder::{ LittleEndian, WriteBytesExt};
+    use byteorder::{LittleEndian, WriteBytesExt};
     use rand::prelude::*;
     use simple_matrix::Matrix;
-    use std::{ fs::File, usize};
+    use std::io::Error;
+    use std::{fs::File, usize};
 
     use super::{apply_activation_function, apply_derivitive_activation_function};
-
+    #[derive(Debug)]
     pub struct TrainLayer {
         input_size: usize,
         output_size: usize,
@@ -75,7 +76,7 @@ pub mod train_layer {
                 count_iter: 0,
             }
         }
-        pub fn forward(&mut self, input: Vec<f64>) -> Result<Vec<f64>, &str> {
+        pub fn forward(&mut self, input: &Vec<f64>) -> Result<Vec<f64>, &str> {
             if input.len() != self.input_size + 1 {
                 return Err("Input size doesn`t match initual input size!");
             }
@@ -93,7 +94,7 @@ pub mod train_layer {
         }
         pub fn backwards(
             &mut self,
-            output_partial_derivitive: Vec<f64>,
+            output_partial_derivitive: &Vec<f64>,
             generate_derivitives: bool,
         ) -> Result<Vec<f64>, &str> {
             if output_partial_derivitive.len() != self.output_size {
@@ -135,22 +136,30 @@ pub mod train_layer {
             self.changes = Matrix::new(self.input_size, self.output_size + 1);
             self.count_iter = 0;
         }
-        pub fn save_layer(&self, file: &mut File) -> std::io::Result<()> {
-            file.write_u64::<LittleEndian>(self.input_size as u64)
-                .unwrap();
-            file.write_u64::<LittleEndian>(self.output_size as u64)
-                .unwrap();
-            file.write_u8(
-            match self.activation_function {
-                ActivationFunction::Sigmoid=>0,
-                ActivationFunction::RELU=>1,
-                ActivationFunction::InverseTan=>2
-            });
+        pub fn save_layer(&self, file: &mut File) -> Result<(), Error> {
+            match file.write_u64::<LittleEndian>(self.input_size as u64) {
+                Err(err) => return Err(err),
+                _ => (),
+            };
+            match file.write_u64::<LittleEndian>(self.output_size as u64) {
+                Err(err) => return Err(err),
+                _ => (),
+            }
+            match file.write_u8(match self.activation_function {
+                ActivationFunction::Sigmoid => 0,
+                ActivationFunction::RELU => 1,
+                ActivationFunction::InverseTan => 2,
+            }){
+                Err(err) => return Err(err),
+                _ => (), 
+            };
 
             for row in 0..self.output_size {
                 for col in 0..=self.input_size {
-                    file.write_f64::<LittleEndian>(self.weights.get(row, col).unwrap() + 0.0)
-                        .unwrap();
+                    match file.write_f64::<LittleEndian>(self.weights.get(row, col).unwrap() + 0.0){
+                        Err(err) => return Err(err),
+                        _ => (), 
+                    };
                 }
             }
 
@@ -161,12 +170,12 @@ pub mod train_layer {
 pub mod layer {
     use std::fs::File;
 
-    use byteorder::{ReadBytesExt, LittleEndian};
+    use byteorder::{LittleEndian, ReadBytesExt};
     use rand::Rng;
     use simple_matrix::Matrix;
-
-    use super::{ActivationFunction, apply_activation_function};
-
+    use std::io::Error;
+    use super::{apply_activation_function, ActivationFunction};
+    #[derive(Debug)]
     pub struct Layer {
         input_size: usize,
         output_size: usize,
@@ -193,7 +202,7 @@ pub mod layer {
                 activation_function,
             }
         }
-        pub fn forward(&mut self, input: Vec<f64>) -> Result<Vec<f64>, &str> {
+        pub fn forward(&mut self, input: &Vec<f64>) -> Result<Vec<f64>, &str> {
             if input.len() != self.input_size + 1 {
                 return Err("Input size doesn`t match initual input size!");
             }
@@ -207,25 +216,47 @@ pub mod layer {
             output[self.output_size] = 1.0; //bias
             Ok(output)
         }
-        pub fn from(file:&mut File)->Layer{
-            const ERR_MSG:&str = "Problem with reading the file!";
-            let input_size = file.read_u64::<LittleEndian>().expect(ERR_MSG) as usize;
-            let output_size = file.read_u64::<LittleEndian>().expect(ERR_MSG) as usize;
-            let f_byte = file.read_u8().expect(ERR_MSG);
-            let activation_function = match f_byte {
-                0=>ActivationFunction::Sigmoid,
-                1=>ActivationFunction::RELU,
-                2=>ActivationFunction::InverseTan,
-                _=>panic!("Unknown activation function")
+        pub fn from(file: &mut File) -> Result<Layer,Error> {
+            let input_size = match file.read_u64::<LittleEndian>() {
+                Ok(res)=> res as usize,
+                Err(err)=> return Err(err)
             };
-            let mut weights = Matrix::new(output_size,input_size+1);
+            let output_size = match file.read_u64::<LittleEndian>(){
+                Ok(res)=> res as usize,
+                Err(err)=> return Err(err)
+            };
+            let f_byte = match file.read_u8(){
+                Ok(res)=> res,
+                Err(err)=> return Err(err)
+            };
+            let activation_function = match f_byte {
+                0 => ActivationFunction::Sigmoid,
+                1 => ActivationFunction::RELU,
+                2 => ActivationFunction::InverseTan,
+                _ => ActivationFunction::Sigmoid,
+            };
+            let mut weights = Matrix::new(output_size, input_size + 1);
             for row in 0..output_size {
                 for col in 0..=input_size {
-                    let value = file.read_f64::<LittleEndian>().expect(ERR_MSG);
+                    let value = match file.read_f64::<LittleEndian>(){
+                        Ok(res)=> res,
+                        Err(err)=> return Err(err)
+                    };
                     weights.set(row, col, value);
                 }
             }
-            Layer { input_size, output_size, weights, activation_function }
+            Ok(Layer {
+                input_size,
+                output_size,
+                weights,
+                activation_function,
+            })
+        }
+        pub fn get_input_size(&self)->usize{
+            self.input_size
+        }
+        pub fn get_output_size(&self)->usize{
+            self.output_size
         }
     }
 }
