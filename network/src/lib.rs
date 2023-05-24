@@ -1,21 +1,31 @@
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
-mod layer;
+mod network;
+
 
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::layer::*;
+    use std::fs::File;
+
+    use crate::network::layer::{train_layer::*, ActivationFunction, layer::Layer};
+    
     #[test]
-    fn it_works() {
-        
-        let mut layer:Layer = Layer::new(2, 3, ActivationFunction::Sigmoid);
-        let output = layer.forward(vec![1.0,2.0,1.0]);
-        layer.backwards(vec![1.0,2.0,1.0]);
-        layer.backwards(vec![0.5,0.0,0.25]);
-        layer.apply_gradiant(1.0);
+    fn save() {
+        let mut layer:TrainLayer = TrainLayer::new(2, 3, ActivationFunction::Sigmoid);
+        let res = layer.forward(vec![1.0,2.0,1.0]).unwrap();
+        let mut file = File::create("test").unwrap();
+        layer.save_layer(&mut file).unwrap();
+        panic!("{:?}",res);
+        assert_eq!(4, 4);
+    }
+    #[test]
+    fn read() {
+        let mut file = File::open("test").unwrap();
+        let mut layer:Layer = Layer::from(&mut file);
+        let res = layer.forward(vec![1.0,2.0,1.0]).unwrap();
+        panic!("{:?}",res);
         assert_eq!(4, 4);
     }
 }
