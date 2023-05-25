@@ -45,7 +45,7 @@ mod tests {
             vec![ActivationFunction::Sigmoid, ActivationFunction::Sigmoid],
             1.0,
         );
-        let res = newtork.forward(vec![1.0, 0.0]).unwrap();
+        let res = newtork.forward(&vec![1.0, 0.0]).unwrap();
         newtork.save("test").unwrap();
         panic!("{:?}", res);
         assert_eq!(4, 4);

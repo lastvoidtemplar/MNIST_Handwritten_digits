@@ -47,10 +47,11 @@ pub mod train_network {
                 output: vec![0.0; layer_sizes.last().unwrap() + 0],
             }
         }
-        pub fn forward(&mut self, mut input: Vec<f64>) -> Result<Vec<f64>, &str> {
-            if input.len() != self.input_size {
+        pub fn forward(&mut self, inp: &Vec<f64>) -> Result<Vec<f64>, &str> {
+            if inp.len() != self.input_size {
                 return Err("Invalid size");
             }
+            let mut input = inp.clone();
             input.push(1.0);
             for layer in self.layers.iter_mut() {
                 input = match layer.forward(&input) {
@@ -99,6 +100,12 @@ pub mod train_network {
             }
 
             Ok(())
+        }
+        pub fn get_input_size(&self) ->usize{
+            self.input_size
+        }
+        pub fn get_output_size(&self) ->usize{
+            self.output_size
         }
     }
 }
@@ -177,6 +184,12 @@ pub mod network {
                 output_size:layers[layers_count-1] .get_output_size(), 
                 layers
             })
+        }
+        pub fn get_input_size(&self) ->usize{
+            self.input_size
+        }
+        pub fn get_output_size(&self) ->usize{
+            self.output_size
         }
     }
 }

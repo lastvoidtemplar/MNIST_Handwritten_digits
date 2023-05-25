@@ -57,9 +57,6 @@ pub mod train_layer {
             let mut rng = rand::thread_rng();
             let input = vec![1.0; input_size + 1];
             let mut weights = Matrix::new(output_size, input_size + 1);
-            // for ind in 0..input_size {
-            //     input[ind] = rng.gen();
-            // }
             for row in 0..output_size {
                 for col in 0..=input_size {
                     weights.set(row, col, rng.gen::<f64>()*2.0-1.0);
