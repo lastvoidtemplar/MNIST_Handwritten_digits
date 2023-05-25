@@ -5,7 +5,7 @@ pub enum ActivationFunction {
     RELU,
     InverseTan,
 }
-fn apply_activation_function(x: f64, f: ActivationFunction) -> f64 {
+ fn apply_activation_function(x: f64, f: ActivationFunction) -> f64 {
     match f {
         ActivationFunction::Sigmoid => 1.0 / (1.0 + E.powf(-x)),
         ActivationFunction::RELU => x.max(0.0),
@@ -55,14 +55,14 @@ pub mod train_layer {
             activation_function: ActivationFunction,
         ) -> TrainLayer {
             let mut rng = rand::thread_rng();
-            let mut input = vec![1.0; input_size + 1];
+            let input = vec![1.0; input_size + 1];
             let mut weights = Matrix::new(output_size, input_size + 1);
-            for ind in 0..input_size {
-                input[ind] = rng.gen();
-            }
+            // for ind in 0..input_size {
+            //     input[ind] = rng.gen();
+            // }
             for row in 0..output_size {
                 for col in 0..=input_size {
-                    weights.set(row, col, rng.gen());
+                    weights.set(row, col, rng.gen::<f64>()*2.0-1.0);
                 }
             }
             TrainLayer {
@@ -86,10 +86,12 @@ pub mod train_layer {
                 for col in 0..=self.input_size {
                     output[row] += self.weights.get(row, col).unwrap() * input[col];
                 }
+                
                 self.sum_output[row] = output[row];
                 output[row] = apply_activation_function(output[row], self.activation_function);
             }
             output[self.output_size] = 1.0; //bias
+            
             Ok(output)
         }
         pub fn backwards(
@@ -117,7 +119,7 @@ pub mod train_layer {
                     //changes for perv layer
                     for col in 0..self.input_size {
                         perv_layer_derivitive[col] +=
-                            cost_change * self.changes.get(row, col).unwrap();
+                            cost_change * self.weights.get(row, col).unwrap();
                     }
                 }
             }
@@ -133,7 +135,8 @@ pub mod train_layer {
                     self.weights.set(row, col, new_weight);
                 }
             }
-            self.changes = Matrix::new(self.input_size, self.output_size + 1);
+            self.changes = Matrix::new(self.output_size, self.input_size + 1);
+            
             self.count_iter = 0;
         }
         pub fn save_layer(&self, file: &mut File) -> Result<(), Error> {
@@ -192,7 +195,7 @@ pub mod layer {
             let mut weights = Matrix::new(output_size, input_size + 1);
             for row in 0..output_size {
                 for col in 0..=input_size {
-                    weights.set(row, col, rng.gen());
+                    weights.set(row, col, rng.gen::<f64>()*2.0-1.0);
                 }
             }
             Layer {
@@ -202,7 +205,7 @@ pub mod layer {
                 activation_function,
             }
         }
-        pub fn forward(&mut self, input: &Vec<f64>) -> Result<Vec<f64>, &str> {
+        pub fn forward(&self, input: &Vec<f64>) -> Result<Vec<f64>, &str> {
             if input.len() != self.input_size + 1 {
                 return Err("Input size doesn`t match initual input size!");
             }

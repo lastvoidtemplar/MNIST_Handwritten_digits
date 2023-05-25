@@ -1,12 +1,13 @@
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
-mod network;
+pub mod network;
 
 #[cfg(test)]
 mod tests {
     use std::fs::File;
-
+    //test work with panic
+    //tempary solution for debuging
     use crate::network::{
         layer::{layer::Layer, train_layer::*, ActivationFunction},
         train_network::TrainNetwork, network::Network,

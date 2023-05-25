@@ -5,6 +5,7 @@ pub mod train_network {
     use std::fs::File;
 
     use byteorder::{WriteBytesExt, LittleEndian};
+    use simple_matrix::Matrix;
 
     use super::layer::{train_layer::TrainLayer, ActivationFunction};
     use std::io::Error;
@@ -66,7 +67,7 @@ pub mod train_network {
                 return Err("Invalid size");
             }
             for ind in 0..self.output_size {
-                target[ind] = target[ind] - self.output[ind];
+                target[ind] = -target[ind] + self.output[ind];
             }
             for (ind, layer) in self.layers.iter_mut().enumerate().rev() {
                 target = match layer.backwards(&target, ind != 0) {
@@ -77,12 +78,12 @@ pub mod train_network {
             Ok(())
         }
         pub fn apply_gradiant(&mut self) {
-            for layer in self.layers.iter_mut() {
+            for layer in self.layers.iter_mut(){
                 layer.apply_gradiant(self.learning_rate);
             }
         }
         pub fn save(&self, filename: &str) -> Result<(), Error> {
-            let mut file = match File::create("test") {
+            let mut file = match File::create(filename) {
                 Ok(res) => res,
                 Err(err) => return Err(err),
             };
@@ -117,7 +118,6 @@ pub mod network {
         pub fn new(
             layer_sizes: Vec<usize>,
             activation_functions: Vec<ActivationFunction>,
-            learning_rate: f64,
         ) -> Network {
             if layer_sizes.len() < 2 {
                 panic!("Too small vec layer_sizes");
@@ -140,12 +140,12 @@ pub mod network {
                 output_size: layer_sizes.last().unwrap() + 0,
             }
         }
-        pub fn forward(&mut self, mut input: Vec<f64>) -> Result<Vec<f64>, &str> {
+        pub fn forward(&self, mut input: Vec<f64>) -> Result<Vec<f64>, &str> {
             if input.len() != self.input_size {
                 return Err("Invalid size");
             }
             input.push(1.0);
-            for layer in self.layers.iter_mut() {
+            for layer in self.layers.iter() {
                 input = match layer.forward(&input) {
                     Ok(res) => res,
                     Err(msg) => return Err(msg),
@@ -155,7 +155,7 @@ pub mod network {
             Ok(input)
         }
         pub fn from(filename: &str)->Result<Network,Error>{
-            let mut file = match File::open("test"){
+            let mut file = match File::open(filename){
                 Ok(res)=> res,
                 Err(err)=> return Err(err)
             };
