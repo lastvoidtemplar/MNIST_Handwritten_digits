@@ -32,6 +32,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b00cc1c228a6782d0f076e7b232802e0c5689d41bb5df366f2a6b6621cfdfe1"
 
 [[package]]
+name = "mnist_reader"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+]
+
+[[package]]
 name = "network"
 version = "0.1.0"
 dependencies = [
@@ -86,6 +93,7 @@ checksum = "6927a3d2ea606d10c38c7b923e108e29a2f47ca287e1cb707fa898ce4d58aa7c"
 name = "trainer"
 version = "0.1.0"
 dependencies = [
+ "mnist_reader",
  "network",
 ]
 

@@ -7,4 +7,6 @@ edition = "2021"
 
 [dependencies]
 # byteorder = "1"
+mnist_reader={path="../mnist_reader"}
 network ={ path="../network"}
+
