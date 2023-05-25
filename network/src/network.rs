@@ -147,10 +147,11 @@ pub mod network {
                 output_size: layer_sizes.last().unwrap() + 0,
             }
         }
-        pub fn forward(&self, mut input: Vec<f64>) -> Result<Vec<f64>, &str> {
-            if input.len() != self.input_size {
+        pub fn forward(&self,inp: &Vec<f64>) -> Result<Vec<f64>, &str> {
+            if inp.len() != self.input_size {
                 return Err("Invalid size");
             }
+            let mut input = inp.clone();
             input.push(1.0);
             for layer in self.layers.iter() {
                 input = match layer.forward(&input) {

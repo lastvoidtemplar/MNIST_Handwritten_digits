@@ -34,7 +34,7 @@ mod tests {
     #[test]
     fn read_network() {
         let mut network = Network::from("test").unwrap();
-        let res = network.forward(vec![1.0, 0.0]).unwrap();
+        let res = network.forward(&vec![1.0, 0.0]).unwrap();
         panic!("{:?}", res);
         assert_eq!(4, 4);
     } 
