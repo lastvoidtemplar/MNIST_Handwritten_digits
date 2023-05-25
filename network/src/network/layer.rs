@@ -73,12 +73,12 @@ pub mod train_layer {
                 count_iter: 0,
             }
         }
-        pub fn forward(&mut self, input: &Vec<f64>) -> Result<Vec<f64>, &str> {
+        pub fn forward(&mut self, input: Vec<f64>) -> Result<Vec<f64>, &str> {
             if input.len() != self.input_size + 1 {
                 return Err("Input size doesn`t match initual input size!");
             }
             let mut output = vec![0.0; self.output_size + 1];
-            self.input = input.clone();
+            
             for row in 0..self.output_size {
                 for col in 0..=self.input_size {
                     output[row] += self.weights.get(row, col).unwrap() * input[col];
@@ -88,7 +88,7 @@ pub mod train_layer {
                 output[row] = apply_activation_function(output[row], self.activation_function);
             }
             output[self.output_size] = 1.0; //bias
-            
+            self.input = input;
             Ok(output)
         }
         pub fn backwards(

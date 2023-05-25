@@ -54,7 +54,7 @@ pub mod train_network {
             let mut input = inp.clone();
             input.push(1.0);
             for layer in self.layers.iter_mut() {
-                input = match layer.forward(&input) {
+                input = match layer.forward(input) {
                     Ok(res) => res,
                     Err(msg) => return Err(msg),
                 }

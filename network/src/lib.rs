@@ -25,7 +25,7 @@ mod tests {
     #[test]
     fn save() {
         let mut layer: TrainLayer = TrainLayer::new(2, 3, ActivationFunction::Sigmoid);
-        let res = layer.forward(&vec![1.0, 2.0, 1.0]).unwrap();
+        let res = layer.forward(vec![1.0, 2.0, 1.0]).unwrap();
         let mut file = File::create("test").unwrap();
         layer.save_layer(&mut file).unwrap();
         panic!("{:?}", res);

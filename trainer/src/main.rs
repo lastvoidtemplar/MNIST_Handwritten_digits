@@ -51,7 +51,7 @@ fn main() {
     );
 
     train(&mnist, &mut network, 30, 10);
-    network.save("/home/dyan/Programming/Rust/hand_written/weights8.txt").unwrap();
+    network.save("/home/dyan/Programming/Rust/hand_written/weights1.txt").unwrap();
 }
 // fn main() {
 //     println!("Loading datasets...");
