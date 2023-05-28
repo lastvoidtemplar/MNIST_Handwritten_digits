@@ -1,11 +1,18 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use network::network::network::Network;
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+use std::sync::Mutex;
+
+use mnist_reader::mnist_reader::display_digit;
+use network::network::{layer::ActivationFunction, network::Network};
+use tauri::State;
+
+pub struct NetworkState(Mutex<Network>);
+
 #[tauri::command]
-fn preidict(image:Vec<f64>) -> usize {
-    let network = Network::from("D:\\Programming\\Rust\\MNIST_Handwritten_digits\\weights1.txt").unwrap();
+fn pridict(state:State<NetworkState>,image: Vec<f64>) -> usize {
+    let network = state.0.lock().unwrap();
+    println!("{}", display_digit(&image));
     let res = network.forward(&image).unwrap();
     let mut max = -100.0;
     let mut perdiction = 0;
@@ -17,10 +24,18 @@ fn preidict(image:Vec<f64>) -> usize {
     }
     return perdiction;
 }
+#[tauri::command]
+fn read_network(filename:&str,state:State<NetworkState>) {
+    let mut network = state.0.lock().unwrap();
+    *network = Network::from(filename).unwrap();
+}
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![preidict])
+        .manage(NetworkState(Mutex::from( Network::new(
+            vec![784, 10], 
+            vec![ActivationFunction::Sigmoid]))))
+        .invoke_handler(tauri::generate_handler![pridict,read_network])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

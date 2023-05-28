@@ -13,6 +13,12 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "dialog": {
+        "ask": true, 
+        "confirm": true, 
+        "message": true, 
+        "open": true
+      },
       "shell": {
         "all": false,
         "open": true
@@ -21,7 +27,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "mnist.ui",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",

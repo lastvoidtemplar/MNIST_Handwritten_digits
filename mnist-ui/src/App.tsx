@@ -5,7 +5,7 @@ import DigitCanvas from './components/DigitCanvas'
 export const PIXEL_SIZE = 15
 function App() {
   return (
-    <div className='w-screen h-screen flex justify-center items-center'>
+    <div className='w-screen h-screen flex flex-col justify-center items-center'>
        <DigitCanvas width={28*PIXEL_SIZE} height={28*PIXEL_SIZE}/>
     </div>
   

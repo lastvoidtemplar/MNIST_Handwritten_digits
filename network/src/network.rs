@@ -83,11 +83,7 @@ pub mod train_network {
                 layer.apply_gradiant(self.learning_rate);
             }
         }
-        pub fn save(&self, filename: &str) -> Result<(), Error> {
-            let mut file = match File::create(filename) {
-                Ok(res) => res,
-                Err(err) => return Err(err),
-            };
+        pub fn save(&self,mut file:File) -> Result<(), Error> {
             match file.write_u64::<LittleEndian>(self.layers.len() as u64){
                 Err(err) => return Err(err),
                 _ => (),

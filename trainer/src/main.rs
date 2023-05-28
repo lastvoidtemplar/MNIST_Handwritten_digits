@@ -1,3 +1,5 @@
+use std::{env, fs::File};
+
 use mnist_reader::mnist_reader::{display_digit, MnistReader};
 use network::network::{layer::ActivationFunction, network::Network, train_network::TrainNetwork};
 fn train(mnist: &MnistReader, network: &mut TrainNetwork, epoches: usize, batch_size: usize) {
@@ -36,10 +38,18 @@ fn train(mnist: &MnistReader, network: &mut TrainNetwork, epoches: usize, batch_
     }
 }
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 3 || args[1]!="-f"{
+        panic!("Must enter only one argument: -f [filename where weight will saved]");
+    }
+
     println!("Loading datasets...");
     let mnist = MnistReader::load_mnist(
-        "/home/dyan/Programming/Rust/hand_written/mnist"
-    ).unwrap();
+        "/home/dyan/Programming/Rust/MNIST_Handwritten_digits/mnist").unwrap();
+    
+    println!("Creating the file...");
+    let file = File::create(&args[2]).unwrap();
+
     println!("Training...");
     let mut network = TrainNetwork::new(
         vec![784, 100, 10],
@@ -50,8 +60,8 @@ fn main() {
         3.0,
     );
 
-    train(&mnist, &mut network, 30, 10);
-    network.save("/home/dyan/Programming/Rust/hand_written/weights1.txt").unwrap();
+    train(&mnist, &mut network, 5, 10);
+    network.save(file).unwrap();
 }
 // fn main() {
 //     println!("Loading datasets...");

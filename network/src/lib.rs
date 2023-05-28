@@ -46,7 +46,8 @@ mod tests {
             1.0,
         );
         let res = newtork.forward(&vec![1.0, 0.0]).unwrap();
-        newtork.save("test").unwrap();
+        let mut testFile = File::create("test").unwrap();
+        newtork.save(testFile).unwrap();
         panic!("{:?}", res);
         assert_eq!(4, 4);
     }
