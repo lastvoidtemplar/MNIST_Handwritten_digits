@@ -39,13 +39,12 @@ fn train(mnist: &MnistReader, network: &mut TrainNetwork, epoches: usize, batch_
 }
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 3 || args[1]!="-f"{
-        panic!("Must enter only one argument: -f [filename where weight will saved]");
+    if args.len() != 5 || args[1]!="-f" ||args[3] != "-d"{
+        panic!("Must enter only two arguments: -f [filepath where weights will be saved] and -d [filepath to mnist directory]");
     }
 
     println!("Loading datasets...");
-    let mnist = MnistReader::load_mnist(
-        "/home/dyan/Programming/Rust/MNIST_Handwritten_digits/mnist").unwrap();
+    let mnist = MnistReader::load_mnist(&args[4]).unwrap();
     
     println!("Creating the file...");
     let file = File::create(&args[2]).unwrap();
